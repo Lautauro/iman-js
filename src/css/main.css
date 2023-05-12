@@ -1,0 +1,25 @@
+*, 
+*::after, 
+*::before {
+    box-sizing: border-box;
+}
+
+body {
+    background: #252525;
+}
+
+canvas {
+    position: relative;
+}
+
+/* textarea {
+    position: fixed;
+} */
+
+.canvas-container textarea {
+    min-width: 500px;
+
+    left: 0;
+    position: absolute  ;
+    top: 0;
+}
