@@ -1,5 +1,4 @@
 import { Entity } from './entity.js';
-import { V2 } from './vector.js';
 
 export class Images {
     constructor() {
@@ -20,7 +19,7 @@ export class Images {
 
     new(obj) {
         return new Promise(async (resolve, reject) => {
-            // obj.img = new Image();
+
             obj.type = 'image';
 
             obj.onerror = (err) => { reject(err) };
@@ -29,7 +28,7 @@ export class Images {
                     image.properties.width  = img.target.width;
                     image.properties.height = img.target.height;
 
-                    /* CHANGE THIS LATER */
+                    /* TO-DO: Change this later to have multiple origins. Ex: middle right, left corner, etc.  */
 
                     image.properties.originX = image.properties.width/2;
                     image.properties.originY = image.properties.height/2;
@@ -101,6 +100,10 @@ export class ImageResize {
     constructor(image) {
         this.img = image;
 
+        /**
+         * Bounding boxes.
+         */
+
         this.bboxW = {
             left:   this.img.pos.x - this.img.properties.originX,
             right:  this.img.pos.x + this.img.properties.width  - this.img.properties.originX,
@@ -120,36 +123,34 @@ export class ImageResize {
         for (let y in this.bboxH) {
             for (let x in this.bboxW) {
                 this.manipulation.push(
-                new Entity({
-                    name: new Set([y, x]),
-                    type: 'manipulator',
+                    new Entity({
+                        name: new Set([y, x]),
+                        type: 'manipulator',
 
-                    x: this.bboxW[x],
-                    y: this.bboxH[y],
+                        x: this.bboxW[x],
+                        y: this.bboxH[y],
 
-                    width:  20,
-                    height: 20,
+                        width:  20,
+                        height: 20,
 
-                    originX: 10,
-                    originY: 10,
+                        originX: 10,
+                        originY: 10,
 
-                    onmove: (me) => {
-                        for (let box of this.manipulation) {
-                            if (box.name.has('top') && me.name.has('top') || box.name.has('bottom') && me.name.has('bottom') ) {
-                                box.pos.y = me.pos.y;
+                        onmove: (me) => {
+                            for (let box of this.manipulation) {
+                                if (box.name.has('top') && me.name.has('top') || box.name.has('bottom') && me.name.has('bottom') ) {
+                                    box.pos.y = me.pos.y;
+                                }
+
+                                if (box.name.has('left') && me.name.has('left') || box.name.has('right') && me.name.has('right') ) {
+                                    box.pos.x = me.pos.x;
+                                }
                             }
-
-                            if (box.name.has('left') && me.name.has('left') || box.name.has('right') && me.name.has('right') ) {
-                                box.pos.x = me.pos.x;
-
-                                
-                            }
-                        }
-                        
-                        this.img.properties.width = this.manipulation[1].pos.x - this.manipulation[0].pos.x;
-                        this.img.properties.height = this.manipulation[2].pos.y - this.manipulation[0].pos.y;
-                    },
-                }
+                            
+                            this.img.properties.width = this.manipulation[1].pos.x - this.manipulation[0].pos.x;
+                            this.img.properties.height = this.manipulation[2].pos.y - this.manipulation[0].pos.y;
+                        },
+                    }
                 ));
             }
         }
@@ -177,6 +178,12 @@ export class ImageResize {
             }
         }
     }
+
+    delete() {
+        for (let entity of this.manipulation) {
+            entity.delete();
+        }
+    }
 }
 
 /**
@@ -201,7 +208,7 @@ export class ImageManipulator {
 
         this.type = MANIPULATOR_TYPE.TRANSFORM;
 
-        this.selected = new Set();
+        this.selected = null;
     }
 
     /**
@@ -209,13 +216,11 @@ export class ImageManipulator {
      */
 
     select(image) {
-        if (!this.selected.has(image)) {
+        if (this.selected !== image) {
 
-            const resize = new ImageResize(image);
+            this.deselect();
 
-            this.selected.clear();
-
-            this.selected.add(resize);
+            this.selected = new ImageResize(image);
 
             return image;
         }
@@ -227,39 +232,30 @@ export class ImageManipulator {
      * Deselect image.
      */
 
-    deselect(image) {
-        if (image) {
-            if (this.selected.has(image)) {
-    
-                this.selected.delete(image);
-    
-                return this.selected;
-    
-            }
-        } else {
-            return this.selected.clear();
+    deselect() {
+
+        if (this.selected) {
+            this.selected.delete();
         }
 
-        return false;
+        return this.selected = null;
     }
 
     draw(ctx) {
-        if (this.selected.size) {
-            this.selected.forEach((selec) => {
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 4;
-                ctx.strokeRect(selec.bboxW.left, selec.bboxH.top, selec.img.properties.width, selec.img.properties.height);
-                ctx.strokeStyle = '#6b6b6b';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(selec.bboxW.left, selec.bboxH.top, selec.img.properties.width, selec.img.properties.height);
+        if (this.selected) {
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(this.selected.bboxW.left, this.selected.bboxH.top, this.selected.img.properties.width, this.selected.img.properties.height);
+            ctx.strokeStyle = '#6b6b6b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(this.selected.bboxW.left, this.selected.bboxH.top, this.selected.img.properties.width, this.selected.img.properties.height);
 
-                selec.manipulation.forEach((box) => {
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(box.pos.x - box.properties.originX , box.pos.y - box.properties.originY , box.properties.width, box.properties.height);
-                    ctx.fillStyle = '#6b6b6b';
-                    ctx.fillRect(box.pos.x - box.properties.originX , box.pos.y - box.properties.originY , box.properties.width, box.properties.height);
-                })
+            this.selected.manipulation.forEach((box) => {
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(box.pos.x - box.properties.originX , box.pos.y - box.properties.originY , box.properties.width, box.properties.height);
+                ctx.fillStyle = '#6b6b6b';
+                ctx.fillRect(box.pos.x - box.properties.originX , box.pos.y - box.properties.originY , box.properties.width, box.properties.height);
             })
         }
     }
