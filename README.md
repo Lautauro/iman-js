@@ -9,21 +9,17 @@
 * Use the middle click to place an image.
 
 ## To-do:
-
 - [x] Move images/entities. (kinda ????)
 
--  [ ] Transform images:
-    
-    - [ ] Rotation.
-
-    - [ ] Scale.
-
+### Transform images:
+- [ ] Rotation.
+- [ ] Scale.
 - [ ] Crop images.
 
-- [ ] Interface.
-    - [ ] Draw text system.
-    - [ ] Buttons system.
-    - [ ] Menus system.
+### Interface:
+- [ ] Draw text system.
+- [ ] Buttons system.
+- [ ] Menus system.
 
 
 ## Note:
