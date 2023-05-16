@@ -19,6 +19,8 @@ export class Entity {
      */
     constructor(obj) {
 
+        this.id = ENTITIES.length ? ENTITIES[ ENTITIES.length - 1 ].id + 1 : 0;
+
         /**
          * Coordinates of the Entity.
          */
@@ -52,8 +54,12 @@ export class Entity {
          * Event listeners
          */
 
-        this.onclick = obj.onclick;
-        this.onmove  = obj.onmove;
+        this.onclick = obj.onclick ?? function() {};
+        this.onmove  = obj.onmove  ?? function() {};
+
+        /**
+         * Type of Entity. Ex: image, button (TO-DO), etc...
+         */
         
         this.type = obj.type ?? 'generic';
 
@@ -70,21 +76,19 @@ export class Entity {
                 this.img.src     = obj.src;
             }
 
-            // TO-DO: Menu, idk something lol.
         }
+
+        /**
+         * Add Entity to the list.
+         */
 
         ENTITIES.push(this);
     }
 
-    // Test, I don't know if I'm ever going to use this.
-    static distanceBetween(entity1, entity2) {
-        return entity1.pos.dis(entity2);
-    }
-
     /**
      * Check if entity collide.
-     * @param {number} x 
-     * @param {number} y 
+     * @param {number} x coordinates.
+     * @param {number} y coordinates.
      * @returns {boolean}
      */
 
@@ -100,6 +104,11 @@ export class Entity {
         }
     }
 
+    /**
+     * Delete this Entity.
+     * @returns {this}
+     */
+
     delete() {
         for (let i = 0; i < ENTITIES.length; i++) {
             if (ENTITIES[i] == this) {
@@ -109,6 +118,13 @@ export class Entity {
         }
     }
 
+    /**
+     * Move this Entity to a relative position.
+     * @param {number} x coordinates.
+     * @param {number} y coordinates.
+     * @returns {this}
+     */
+
     move(x = 0, y = 0) {
         this.pos.x += x;
         this.pos.y += y;
@@ -116,7 +132,16 @@ export class Entity {
         if (this.onmove) {
             this.onmove(this);
         }
+
+        return this;
     }
+
+    /**
+     * Set position of this Entity.
+     * @param {number} x coordinates.
+     * @param {number} y coordinates.
+     * @returns {this}
+     */
 
     setPos(x, y) {
         this.pos.x = x ?? this.pos.x;
@@ -125,5 +150,7 @@ export class Entity {
         if (this.onmove) {
             this.onmove(this);
         }
+
+        return this;
     }
 }
