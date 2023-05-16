@@ -13,16 +13,17 @@
 - [x] Move images/entities. (kinda ????)
 
 -  [ ] Transform images:
-
-    [ ] System of collision to manipulate the .
     
-    [ ] Rotation.
+    - [ ] Rotation.
 
-    [ ] Scale.
+    - [ ] Scale.
 
 - [ ] Crop images.
 
-- Interface.
+- [ ] Interface.
+    - [ ] Draw text system.
+    - [ ] Buttons system.
+    - [ ] Menus system.
 
 
 ## Note:
