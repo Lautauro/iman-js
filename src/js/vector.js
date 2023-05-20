@@ -1,5 +1,5 @@
 /**
- * Vector 2D
+ * 2D Vector
  */
 
 export class V2 {
@@ -26,7 +26,7 @@ export class V2 {
             x2 = arguments[0].x;
             y2 = arguments[0].y;
         }
-
+        
         return new V2(this.x + x2, this.y + y2);
     }
 
