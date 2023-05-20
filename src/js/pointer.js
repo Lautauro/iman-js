@@ -76,16 +76,6 @@ export class Pointer {
          */
 
         /**
-         * Click.
-         */
-
-        window.addEventListener('click', (e) => {
-            if (!this.isDown(e.button)) { this.buttonsDown.push(e.button) };
-
-            this.triggerFunction('click', this.getEventObj(e));
-        });
-
-        /**
          * Mouse down.
          */
 
@@ -98,6 +88,17 @@ export class Pointer {
             this.mouseUp[e.button]   = { x: null, y: null, time: null, buttons: null, event: null };
 
             this.triggerFunction('down', obj);
+
+            /**
+             * Trigger onMouseDown function on clicked element.
+             */
+
+            if (this.clickedElement) {
+                if (typeof this.clickedElement.onMouseDown == 'function') {
+                    this.clickedElement.onMouseDown(obj);
+                }
+            }
+
         });
 
         /**
@@ -124,7 +125,42 @@ export class Pointer {
             this.mouseDown[e.button] = { x: null, y: null, time: null, buttons: null, event: null };
 
             this.triggerFunction('up', this.getEventObj(e));
+
+            /**
+             * Trigger onMouseUp function on clicked element.
+             */
+
+            if (this.clickedElement) {
+                if (typeof this.clickedElement.onMouseUp == 'function') {
+                    this.clickedElement.onMouseUp(obj);
+                }
+            }
         });
+
+        /**
+         * Mouse click.
+         */
+
+        window.addEventListener('click', (e) => {
+            if (!this.isDown(e.button)) { this.buttonsDown.push(e.button) };
+
+            const obj = this.getEventObj(e);
+
+            this.triggerFunction('click', obj);
+
+            /**
+             * Trigger onMouseClick function on clicked element.
+             */
+
+            if (this.clickedElement) {
+                if (typeof this.clickedElement.onMouseClick == 'function') {
+                    this.clickedElement.onMouseClick(obj);
+                }
+
+                this.clickedElement = null;
+            }
+        });
+
 
         /**
          * Mouse move.
@@ -141,6 +177,16 @@ export class Pointer {
             this.moveHistory.push(obj);
 
             this.triggerFunction('move', obj);
+
+            /**
+             * Trigger onMouseMove function on clicked element.
+             */
+
+            if (this.clickedElement) {
+                if (typeof this.clickedElement.onMouseMove == 'function') {
+                    this.clickedElement.onMouseMove(obj);
+                }
+            }
         });
 
         /**
