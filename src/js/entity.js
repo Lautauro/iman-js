@@ -1,6 +1,11 @@
 import { V2 } from './vector.js';
 
-export const ENTITIES = [];
+export const ENTITIES = new Map([
+    ['image', []], 
+    ['manipulation', []],   
+    ['menu', []],           /* TO-DO */
+    ['generic', []],
+]);
 
 export class Entity {
     /**
@@ -28,34 +33,44 @@ export class Entity {
         this.pos = new V2( obj.x, obj.y );
 
         this.properties = {
-            visible:    obj.visible ?? true,
-            originX:    obj.originX ?? 0,
-            originY:    obj.originY ?? 0,
-            width:      obj.width   ?? 0,
-            height:     obj.height  ?? 0,
-            angle:      obj.angle   ?? 0,       // TO-DO
+            origin:     new V2(obj.originX ?? 0, obj.originY ?? 0),
+            
+            visible:     obj.visible       ?? true,
+            width:       obj.width         ?? 0,
+            height:      obj.height        ?? 0,
+            angle:       obj.angle         ?? 0,       // TO-DO
+            fillColor:   obj.fillColor     ?? '#6b6b6b',
+            strokeColor: obj.strokeColor   ?? '#6b6b6b',
         };
 
         this.name = obj.name ?? 'none';
-
+        
         /**
          * Parent
-         */
+        */
 
         this.parent = obj.parent;
+       
+        /**
+        * Defines if the Entity can interact with the mouse.
+        */
+      
+        this.interactive = obj.interactive ?? true;
 
         /**
-         * Defines if the Entity can interact with the mouse.
-         */
+        * Defines if the Entity can be moved by the mouse.
+        */
 
-        this.interactive = obj.interactive ?? true;
+        this.draggable   = obj.draggable   ?? false;
 
         /**
          * Event listeners
          */
 
-        this.onclick = obj.onclick ?? function() {};
-        this.onmove  = obj.onmove  ?? function() {};
+        this.onMouseDown  = obj.onMouseDown;
+        this.onMouseUp    = obj.onMouseUp;
+        this.onMouseClick = obj.onMouseClick;
+        this.onMouseMove  = obj.onMouseMove;
 
         /**
          * Type of Entity. Ex: image, button (TO-DO), etc...
@@ -82,7 +97,12 @@ export class Entity {
          * Add Entity to the list.
          */
 
-        ENTITIES.push(this);
+        if (ENTITIES.has(this.type)) {
+            ENTITIES.get(this.type).push(this);
+        } else {
+            ENTITIES.set(this.type, [this]);
+        }
+
     }
 
     /**
@@ -93,10 +113,10 @@ export class Entity {
      */
 
     checkPointCollision(x, y) {
-        if (x >= this.pos.x - this.properties.originX && 
-            x <= this.pos.x - this.properties.originX + this.properties.width &&
-            y >= this.pos.y - this.properties.originY &&
-            y <= this.pos.y - this.properties.originY + this.properties.height) {
+        if (x >= this.pos.x - this.properties.origin.x && 
+            x <= this.pos.x - this.properties.origin.x + this.properties.width &&
+            y >= this.pos.y - this.properties.origin.y &&
+            y <= this.pos.y - this.properties.origin.y + this.properties.height) {
             
             return true;
         } else {
@@ -110,9 +130,11 @@ export class Entity {
      */
 
     delete() {
-        for (let i = 0; i < ENTITIES.length; i++) {
-            if (ENTITIES[i] == this) {
-                ENTITIES.splice(i, 1);
+        const list = ENTITIES.get(this.type);
+
+        for (let i = 0; i < list.length; i++) {
+            if (list[i] == this) {
+                list.splice(i, 1);
                 return this;
             }
         }
