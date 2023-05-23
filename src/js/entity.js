@@ -19,8 +19,13 @@ export class Entity {
      *      @param {number}  obj.width
      *      @param {number}  obj.height
      *      @param {number}  obj.angle
+     *      @param {object}  obj.parent - Creator.
      *      @param {boolean} obj.interactive
      *      @param {string}  obj.type - "image", to-do, etc.
+     *      @param {function} obj.onMouseDown
+     *      @param {function} obj.onMouseUp
+     *      @param {function} obj.onMouseClick
+     *      @param {function} obj.onMouseMove
      */
     constructor(obj) {
 
@@ -61,7 +66,7 @@ export class Entity {
         * Defines if the Entity can be moved by the mouse.
         */
 
-        this.draggable   = obj.draggable   ?? false;
+        this.draggable    = obj.draggable   ?? false;
 
         /**
          * Event listeners
@@ -113,10 +118,13 @@ export class Entity {
      */
 
     checkPointCollision(x, y) {
-        if (x >= this.pos.x - this.properties.origin.x && 
-            x <= this.pos.x - this.properties.origin.x + this.properties.width &&
-            y >= this.pos.y - this.properties.origin.y &&
-            y <= this.pos.y - this.properties.origin.y + this.properties.height) {
+        const xOffset  = this.properties.width  < 0 ? Math.abs(this.properties.width)  : 0;
+        const yOffset  = this.properties.height < 0 ? Math.abs(this.properties.height) : 0;
+
+        if (x >= this.pos.x - this.properties.origin.x - xOffset && 
+            x <= this.pos.x - this.properties.origin.x + Math.abs(this.properties.width)  - xOffset &&
+            y >= this.pos.y - this.properties.origin.y - yOffset &&
+            y <= this.pos.y - this.properties.origin.y + Math.abs(this.properties.height) - yOffset) {
             
             return true;
         } else {
