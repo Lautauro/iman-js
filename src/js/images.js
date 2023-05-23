@@ -34,7 +34,7 @@ export class Images {
          *      MANIPULATOR_TYPE.CROP ...
          */
 
-        this.manipulator = MANIPULATOR_TYPE.MOVE;
+        this.manipulator = MANIPULATOR_TYPE.TRANSFORM;
 
         this.transform = new ImageTransform();
     }
@@ -67,11 +67,10 @@ export class Images {
                      * Ex: middle right, left corner, etc.
                      */
 
-                    image.properties.origin.x = image.properties.width/2;
-                    image.properties.origin.y = image.properties.height/2;
+                    image.properties.origin.x = obj.originX ?? image.properties.width/2;
+                    image.properties.origin.y = obj.originY ?? image.properties.height/2;
                 }
 
-                // this.list.push(image);
                 resolve(image);
             }
 
@@ -143,13 +142,13 @@ export class Images {
             
             if (this.manipulator !== MANIPULATOR_TYPE.MOVE) {
                 this.transform.img = image; // DEBUG
-                this.transform.update();
-
-                image.draggable = false;
+                this.transform.select(image);
             }
 
             this.selected.add(image);
         } else {
+            this.transform.update();
+
             return this.selected.clear();
         }
     }
@@ -165,6 +164,8 @@ export class Images {
                 });
             }
 
+            this.transform.update();
+
             return this.selected.clear();
         };
 
@@ -176,6 +177,9 @@ export class Images {
 
                 this.selected.delete(value);
             });
+
+            this.transform.select(image);
+
             return this.selected;
         }
 
@@ -183,6 +187,8 @@ export class Images {
             if (this.manipulator !== MANIPULATOR_TYPE.MOVE) {
                 image.draggable = true;
             }
+
+            this.transform.select(image);
 
             return this.selected.delete(image);
         }
@@ -198,45 +204,414 @@ class ImageTransform {
     constructor() {
         this.img = null;
 
-        this.width  = 0;
-        this.height = 0;
+        this.interactive    = false;
+        this.visible        = false;
 
         this.pos = new V2(0, 0);
 
         this.boxes = {
 
+            pivot:      new Entity({ name: 'pivot', parent:   this, type:'manipulation', width: 30, height: 30, originX: 15, originY: 15, draggable: true, fillColor: 'red'}),
+
             /**
              * Top.
              */
 
-            topLeft:  new Entity({ type:'manipulation', width: 20, height: 20, originX: 10, originY: 10, draggable: true}),
-            topMid:   new Entity({ type:'manipulation', width: 12, height: 12, originX: 6 , originY: 6 , draggable: true}),
-            topRight: new Entity({ type:'manipulation', width: 20, height: 20, originX: 10, originY: 10, draggable: true}),
+            topLeft:    new Entity({ name: 'topLeft', parent:  this, type:'manipulation', width: 20, height: 20, originX: 10, originY: 10, draggable: true, 
+                            onMouseDown() {
+
+                                /**
+                                 * Save previous values
+                                 */
+
+                                this.previousPos = new V2(this.pos.x, this.pos.y);
+
+                                /**
+                                 * Parent history.
+                                 */
+
+                                this.parent.previousPos     = this.parent.img.pos;
+                                this.parent.previousWidth   = this.parent.img.properties.width;
+                                this.parent.previousHeight  = this.parent.img.properties.height;
+                                this.parent.previousOrigin  = this.parent.img.properties.origin; // Unused.
+                            },
+
+                            onMouseMove() {
+
+                                /**
+                                 * This counts how many pixels the box moves.
+                                 */
+
+                                const scale = this.pos.sub(this.previousPos);
+
+                                /**
+                                 * Scale the image.
+                                 */
+
+                                this.parent.img.properties.width  = this.parent.previousWidth  - scale.x;
+                                this.parent.img.properties.height = this.parent.previousHeight - scale.y;
+
+                                this.parent.img.pos = this.parent.previousPos.add(scale);
+
+                                /**
+                                 * Update the boxes positions.
+                                 */
+
+                                this.parent.update();
+                            },
+                        }),
+            topMid:     new Entity({ name: 'topMid', parent:   this, type:'manipulation', width: 12, height: 12, originX: 6 , originY: 6 , draggable: true,
+                            onMouseDown() {
+
+                                /**
+                                 * Save previous values
+                                 */
+
+                                this.previousPos = new V2(this.pos.x, this.pos.y);
+
+                                /**
+                                 * Parent history.
+                                 */
+
+                                this.parent.previousPos     = this.parent.img.pos;
+                                this.parent.previousWidth   = this.parent.img.properties.width;
+                                this.parent.previousHeight  = this.parent.img.properties.height;
+                                this.parent.previousOrigin  = this.parent.img.properties.origin; // Unused.
+                            },
+
+                            onMouseMove() {
+
+                                /**
+                                 * This counts how many pixels the box moves.
+                                 */
+
+                                const scale = this.pos.sub(this.previousPos);
+
+                                /**
+                                 * Scale the image.
+                                 */
+
+                                this.parent.img.properties.height = this.parent.previousHeight - scale.y;
+
+                                this.parent.img.pos = this.parent.previousPos.add(0, scale.y);
+
+                                /**
+                                 * Update the boxes positions.
+                                 */
+
+                                this.parent.update();
+                            },
+                        }),
+            topRight:   new Entity({ name: 'topRight', parent: this, type:'manipulation', width: 20, height: 20, originX: 10, originY: 10, draggable: true,
+                            onMouseDown() {
+
+                                /**
+                                 * Save previous values
+                                 */
+
+                                this.previousPos = new V2(this.pos.x, this.pos.y);
+
+                                /**
+                                 * Parent history.
+                                 */
+
+                                this.parent.previousPos     = this.parent.img.pos;
+                                this.parent.previousWidth   = this.parent.img.properties.width;
+                                this.parent.previousHeight  = this.parent.img.properties.height;
+                                this.parent.previousOrigin  = this.parent.img.properties.origin; // Unused.
+                            },
+
+                            onMouseMove() {
+
+                                /**
+                                 * This counts how many pixels the box moves.
+                                 */
+
+                                const scale = this.pos.sub(this.previousPos);
+                                console.log(scale);
+
+                                /**
+                                 * Scale the image.
+                                 */
+
+                                this.parent.img.properties.width  = this.parent.previousWidth  + scale.x;
+                                this.parent.img.properties.height = this.parent.previousHeight - scale.y;
+
+                                this.parent.img.pos = this.parent.previousPos.add(0, scale.y);
+
+                                /**
+                                 * Update the boxes positions.
+                                 */
+
+                                this.parent.update();
+                            },
+                        }),
 
             /**
              * Middle.
              */
 
-            midLeft:  new Entity({ type:'manipulation', width: 12, height: 12, originX: 6 , originY: 6 , draggable: true}),
-            middle:   new Entity({ type:'manipulation', width: 20, height: 20, originX: 10, originY: 10, draggable: true}),
-            midRight: new Entity({ type:'manipulation', width: 12, height: 12, originX: 6 , originY: 6 , draggable: true}),
+            midLeft:    new Entity({ name: 'midLeft', parent:  this, type:'manipulation', width: 12, height: 12, originX: 6 , originY: 6 , draggable: true,
+                            onMouseDown() {
+
+                                /**
+                                 * Save previous values
+                                 */
+
+                                this.previousPos = new V2(this.pos.x, this.pos.y);
+
+                                /**
+                                 * Parent history.
+                                 */
+
+                                this.parent.previousPos     = this.parent.img.pos;
+                                this.parent.previousWidth   = this.parent.img.properties.width;
+                                this.parent.previousHeight  = this.parent.img.properties.height;
+                                this.parent.previousOrigin  = this.parent.img.properties.origin; // Unused.
+                            },
+
+                            onMouseMove() {
+
+                                /**
+                                 * This counts how many pixels the box moves.
+                                 */
+
+                                const scale = this.pos.sub(this.previousPos);
+
+                                /**
+                                 * Scale the image.
+                                 */
+
+                                this.parent.img.properties.width = this.parent.previousWidth - scale.x;
+
+                                this.parent.img.pos = this.parent.previousPos.add(scale.x, 0);
+
+                                /**
+                                 * Update the boxes positions.
+                                 */
+
+                                this.parent.update();
+                            },
+                        }),
+            middle:     new Entity({ name: 'midMid', parent:   this, type:'manipulation', width: 20, height: 20, originX: 10, originY: 10, draggable: true}),
+            midRight:   new Entity({ name: 'midRight', parent: this, type:'manipulation', width: 12, height: 12, originX: 6 , originY: 6 , draggable: true,
+                            onMouseDown() {
+
+                                /**
+                                 * Save previous values
+                                 */
+
+                                this.previousPos = new V2(this.pos.x, this.pos.y);
+
+                                /**
+                                 * Parent history.
+                                 */
+
+                                this.parent.previousPos     = this.parent.img.pos;
+                                this.parent.previousWidth   = this.parent.img.properties.width;
+                                this.parent.previousHeight  = this.parent.img.properties.height;
+                                this.parent.previousOrigin  = this.parent.img.properties.origin; // Unused.
+                            },
+
+                            onMouseMove() {
+
+                                /**
+                                 * This counts how many pixels the box moves.
+                                 */
+
+                                const scale = this.pos.sub(this.previousPos);
+
+                                /**
+                                 * Scale the image.
+                                 */
+
+                                this.parent.img.properties.width = this.parent.previousWidth + scale.x;
+
+                                // this.parent.img.pos = this.parent.previousPos.add(0, 0);
+
+                                /**
+                                 * Update the boxes positions.
+                                 */
+
+                                this.parent.update();
+                            },
+                        }),
 
             /**
              * Bottom.
              */
 
-            botLeft:  new Entity({ type:'manipulation', width: 20, height: 20, originX: 10, originY: 10, draggable: true}),
-            botMid:   new Entity({ type:'manipulation', width: 12, height: 12, originX: 6 , originY: 6 , draggable: true}),
-            botRight: new Entity({ type:'manipulation', width: 20, height: 20, originX: 10, originY: 10, draggable: true}),
+            botLeft:    new Entity({ name: 'botLeft', parent:  this, type:'manipulation', width: 20, height: 20, originX: 10, originY: 10, draggable: true,
+                            onMouseDown() {
+
+                                /**
+                                 * Save previous values
+                                 */
+
+                                this.previousPos = new V2(this.pos.x, this.pos.y);
+
+                                /**
+                                 * Parent history.
+                                 */
+
+                                this.parent.previousPos     = this.parent.img.pos;
+                                this.parent.previousWidth   = this.parent.img.properties.width;
+                                this.parent.previousHeight  = this.parent.img.properties.height;
+                                this.parent.previousOrigin  = this.parent.img.properties.origin; // Unused.
+                            },
+
+                            onMouseMove() {
+
+                                /**
+                                 * This counts how many pixels the box moves.
+                                 */
+
+                                const scale = this.pos.sub(this.previousPos);
+
+                                /**
+                                 * Scale the image.
+                                 */
+
+                                this.parent.img.properties.width  = this.parent.previousWidth  - scale.x;
+                                this.parent.img.properties.height = this.parent.previousHeight + scale.y;
+
+                                this.parent.img.pos = this.parent.previousPos.add(scale.x, 0);
+
+                                /**
+                                 * Update the boxes positions.
+                                 */
+
+                                this.parent.update();
+                            },
+                        }),
+            botMid:     new Entity({ name: 'botMid', parent:   this, type:'manipulation', width: 12, height: 12, originX: 6 , originY: 6 , draggable: true,
+                            onMouseDown() {
+
+                                /**
+                                 * Save previous values
+                                 */
+
+                                this.previousPos = new V2(this.pos.x, this.pos.y);
+
+                                /**
+                                 * Parent history.
+                                 */
+
+                                this.parent.previousPos     = this.parent.img.pos;
+                                this.parent.previousWidth   = this.parent.img.properties.width;
+                                this.parent.previousHeight  = this.parent.img.properties.height;
+                                this.parent.previousOrigin  = this.parent.img.properties.origin; // Unused.
+                            },
+
+                            onMouseMove() {
+
+                                /**
+                                 * This counts how many pixels the box moves.
+                                 */
+
+                                const scale = this.pos.sub(this.previousPos);
+
+                                /**
+                                 * Scale the image.
+                                 */
+
+                                this.parent.img.properties.height = this.parent.previousHeight + scale.y;
+
+                                // this.parent.img.pos = this.parent.previousPos.add(0);
+
+                                /**
+                                 * Update the boxes positions.
+                                 */
+
+                                this.parent.update();
+                            },
+                        }),
+            botRight:   new Entity({ name: 'botRight', parent: this, type:'manipulation', width: 20, height: 20, originX: 10, originY: 10, draggable: true,
+                            onMouseDown() {
+
+                                /**
+                                 * Save previous values
+                                 */
+
+                                this.previousPos = new V2(this.pos.x, this.pos.y);
+
+                                /**
+                                 * Parent history.
+                                 */
+
+                                this.parent.previousPos     = this.parent.img.pos;
+                                this.parent.previousWidth   = this.parent.img.properties.width;
+                                this.parent.previousHeight  = this.parent.img.properties.height;
+                                this.parent.previousOrigin  = this.parent.img.properties.origin; // Unused.
+                            },
+
+                            onMouseMove() {
+
+                                /**
+                                 * This counts how many pixels the box moves.
+                                 */
+
+                                const scale = this.pos.sub(this.previousPos);
+
+                                /**
+                                 * Scale the image.
+                                 */
+
+                                this.parent.img.properties.width  = this.parent.previousWidth  + scale.x;
+                                this.parent.img.properties.height = this.parent.previousHeight + scale.y;
+
+                                // this.parent.img.pos = this.parent.previousPos.add(0);
+
+                                /**
+                                 * Update the boxes positions.
+                                 */
+
+                                this.parent.update();
+                            },
+                        }),
         };
+
+        /**
+         * History
+         */
+
+        this.previousImg    = null;
+        this.previousWidth  = null;
+        this.previousHeight = null;
+        this.previousPos    = null;
+        this.previousOrigin = null;
     }
 
     update() {
         if (this.img) {
 
+            /**
+             * Unhide boxes.
+             */
+
+            if (!this.interactive) {
+                this.visible = true;
+                this.interactive = true;
+
+                for (let box in this.boxes) {
+                    this.boxes[box].interactive         = true;
+                    this.boxes[box].properties.visible  = true;
+                }
+            }
+
+            /**
+             * Set the same position of the image.
+             */
+
             this.pos    = new V2(this.img.pos.x, this.img.pos.y);
             this.width  = this.img.properties.width;
             this.height = this.img.properties.height;
+
+            /**
+             * Pivot  // TEST
+             */
+
+            this.boxes.pivot.pos   = new V2(this.img.pos.x, this.img.pos.y);
 
             /**
              * Top.
@@ -284,11 +659,40 @@ class ImageTransform {
             this.boxes.botRight.pos = new V2(this.img.pos.x, this.img.pos.y)
                                             .sub(this.img.properties.origin)
                                             .add(this.img.properties.width, this.img.properties.height);
+        } else {
+
+            /**
+             * Hide boxes.
+             */
+
+            this.visible        = false;
+            this.interactive    = false;
+
+            for (let box in this.boxes) {
+                this.boxes[box].interactive = false;
+                this.boxes[box].properties.visible = false;
+            }
         }
     }
 
-    draw(ctx) {
+    select(img) {
+
         if (this.img) {
+            this.previousImg = this.img;
+        }
+
+        this.img = img;
+
+        /**
+         * Update manipulator position when the image is moved.
+         */
+
+        this.img.onMouseMove = () => { this.update() };
+        this.update();
+    }
+
+    draw(ctx) {
+        if (this.img && this.visible) {
 
             /**
              * Borders
@@ -306,11 +710,13 @@ class ImageTransform {
              */
 
             for (let box in this.boxes) {
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(this.boxes[box].pos.x - this.boxes[box].properties.origin.x , this.boxes[box].pos.y - this.boxes[box].properties.origin.y , this.boxes[box].properties.width, this.boxes[box].properties.height);
-                ctx.fillStyle = this.boxes[box].properties.color;
-                ctx.fillRect(this.boxes[box].pos.x - this.boxes[box].properties.origin.x , this.boxes[box].pos.y - this.boxes[box].properties.origin.y , this.boxes[box].properties.width, this.boxes[box].properties.height);
+                if (this.boxes[box].properties.visible) {   
+                    ctx.strokeStyle = this.boxes[box].properties.strokeColor;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(this.boxes[box].pos.x - this.boxes[box].properties.origin.x , this.boxes[box].pos.y - this.boxes[box].properties.origin.y , this.boxes[box].properties.width, this.boxes[box].properties.height);
+                    ctx.fillStyle = this.boxes[box].properties.fillColor;
+                    ctx.fillRect(this.boxes[box].pos.x - this.boxes[box].properties.origin.x , this.boxes[box].pos.y - this.boxes[box].properties.origin.y , this.boxes[box].properties.width, this.boxes[box].properties.height);
+                }
             }
         }
     }
