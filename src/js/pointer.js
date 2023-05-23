@@ -93,7 +93,7 @@ export class Pointer {
              * Trigger onMouseDown function on clicked element.
              */
 
-            if (this.clickedElement) {
+            if (this.clickedElement && this.clickedElement.interactive) {
                 if (typeof this.clickedElement.onMouseDown == 'function') {
                     this.clickedElement.onMouseDown(obj);
                 }
@@ -130,7 +130,7 @@ export class Pointer {
              * Trigger onMouseUp function on clicked element.
              */
 
-            if (this.clickedElement) {
+            if (this.clickedElement && this.clickedElement.interactive) {
                 if (typeof this.clickedElement.onMouseUp == 'function') {
                     this.clickedElement.onMouseUp(obj);
                 }
@@ -152,7 +152,7 @@ export class Pointer {
              * Trigger onMouseClick function on clicked element.
              */
 
-            if (this.clickedElement) {
+            if (this.clickedElement && this.clickedElement.interactive) {
                 if (typeof this.clickedElement.onMouseClick == 'function') {
                     this.clickedElement.onMouseClick(obj);
                 }
@@ -182,7 +182,7 @@ export class Pointer {
              * Trigger onMouseMove function on clicked element.
              */
 
-            if (this.clickedElement) {
+            if (this.clickedElement && this.clickedElement.interactive) {
                 if (typeof this.clickedElement.onMouseMove == 'function') {
                     this.clickedElement.onMouseMove(obj);
                 }
