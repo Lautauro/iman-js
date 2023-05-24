@@ -1,5 +1,5 @@
 /**
- * Vector 2D
+ * 2D Vector
  */
 
 export class V2 {
@@ -26,7 +26,7 @@ export class V2 {
             x2 = arguments[0].x;
             y2 = arguments[0].y;
         }
-
+        
         return new V2(this.x + x2, this.y + y2);
     }
 
@@ -49,10 +49,16 @@ export class V2 {
         return new V2(this.x * scale, this.y * scale);
     }
 
-    dis(that) {
-        const xDis = this.x - that.x;
-        const yDis = this.y - that.y;
+    distanceTo(that) {
+        const xDis = that.x - this.x;
+        const yDis = that.y - this.y;
 
-        return Math.sqrt((xDis * xDis) + (yDis * yDis)); 
+        return new V2(xDis, yDis);
+    }
+
+    length(that) {
+        const dis = this.dis(that);
+
+        return Math.sqrt((dis.x * dis.x) + (dis.y * dis.y)); 
     }
 }

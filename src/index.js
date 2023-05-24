@@ -1,6 +1,6 @@
 'use strict';
 import { ENTITIES } from "./js/entity.js";
-import { Images, ImageManipulator, ImageResize } from "./js/images.js";
+import { Images, MANIPULATOR_TYPE } from "./js/images.js";
 import { Pointer } from "./js/pointer.js";
 
 /**
@@ -18,14 +18,16 @@ const ctx = canvas.getContext('2d');
  */
 
 export const IMAGES  = new Images();
-export const MANIPULATOR  = new ImageManipulator();
 export const POINTER = new Pointer(canvas);
+
+export const IMAGES_LIST = IMAGES.list; // DEBUG
+export const ENTITIES_LIST = ENTITIES; // DEBUG
+
+let windowResized = false;
 
 /**
  * Step function.
  */
-
-let windowResized = false;
 
 function step() {
     if (windowResized) {
@@ -54,12 +56,6 @@ function step() {
     IMAGES.draw(ctx);
 
     /**
-     * Draw Manipulator
-     */
-
-    MANIPULATOR.draw(ctx);
-
-    /**
      * Draw Interface
      */
 
@@ -71,10 +67,11 @@ function step() {
 window.requestAnimationFrame(step);
 
 /**
- * Functions
+ * Functions section.
  */
 
 /**
+ * Select entity.
  * 
  * @param {number} x 
  * @param {number} y 
@@ -83,18 +80,24 @@ window.requestAnimationFrame(step);
  * @callback requestCallback
  * @param {object} Entity
  */
-
 function pointSelection(x, y, callback) {
-    for (let i = ENTITIES.length -1; i >= 0; i--) {
-        if (ENTITIES[i].checkPointCollision(x, y)) {
-            if (!callback) { return ENTITIES[i] };
 
-            return callback(ENTITIES[i]);
+    let selection = null;
+
+    for (let list of ENTITIES.values()) {
+        for (let i = list.length - 1; i >= 0; i--) {
+            if (list[i].checkPointCollision( x, y ) && list[i].properties.visible ) {
+                selection = list[i];
+                break;
+            };
         }
-    }
+    };
 
-    if (!callback) { return null };
-    return callback(null);
+    if (!callback) { 
+        return selection;
+    } else {
+        return callback(selection);
+    };
 }
 
 /**
@@ -109,53 +112,87 @@ window.addEventListener('resize', (e) => {
  * Pointer listener
  */
 
-let pointSelected = null;
-
 POINTER.on('move', (e) => {
-    if (POINTER.isDown(0)) {
+
+    /**
+     * Mouse hover.
+     */
+
+    POINTER.mouseHover = pointSelection(e.x, e.y);
+
+    if (POINTER.isDown(POINTER.BTN_LEFT)) {
 
         /**
          * Move entity with the mouse.
          */
 
-        if (pointSelected) {
-            pointSelected.move( e.x - POINTER.getMoveHistory(-2).x, e.y - POINTER.getMoveHistory(-2).y );
+        if (POINTER.clickedElement && POINTER.clickedElement.draggable) {
+            POINTER.clickedElement.move( e.x - POINTER.getMoveHistory(-2).x, e.y - POINTER.getMoveHistory(-2).y );
         }
     }
 });
 
+/**
+ * Mouse down
+ */
+
 POINTER.on('down', (e) => {
-    if (POINTER.isDown(0) && !POINTER.isDown(1)) {
-        pointSelection(e.x, e.y, (entity) => {
-            if (entity) {
 
-                console.log('Selected: ', entity);
-                
-                if (entity.onclick) {
-                    entity.onclick();
-                };
+    if (POINTER.isDown(POINTER.BTN_LEFT) && !POINTER.isDown(POINTER.BTN_MIDDLE)) {
 
-                if (entity.type == 'image') {
-                    MANIPULATOR.select(entity);
-                }
-    
-                pointSelected = entity;
-                
-                if (entity.type == 'manipulator') {
-                    // TO-DO
-                }
+        /**
+         * Select entity on click.
+         */
 
-            } else {
-                MANIPULATOR.deselect();
-                pointSelected = null;
-            }
-        });
-    } else if (POINTER.isDown(1)) {
+        POINTER.clickedElement = POINTER.mouseHover;
+
+        /**
+         * Select image in MANIPULATOR.
+         */
+
+        if (POINTER.clickedElement?.type == 'image') {
+
+            IMAGES.select(POINTER.clickedElement);
+            
+        }
+
+        /**
+         * Deselect image in MANIPULATOR.
+         */
+
+        if (!POINTER.clickedElement) {
+            IMAGES.deselect();
+        }
+
+    } else if (POINTER.isDown(POINTER.BTN_MIDDLE)) {
+
+        /**
+         * Deselect image in MANIPULATOR.
+         */
+
+        IMAGES.deselect();
+
+        /**
+         * Create image
+         */
+
         IMAGES.new( 
             { 
                 src: 'images/centro.jpg', 
                 x: e.x, 
                 y: e.y,
+                draggable: true,
             } );
     }
-});    
+});
+
+// DEBUG //
+
+IMAGES.new( 
+    {
+        name: 'debug',
+        src: 'images/centro.jpg', 
+        x: canvas.width/2, 
+        y: canvas.height/2,
+        draggable: true,
+    } );
