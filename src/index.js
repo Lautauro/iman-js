@@ -161,15 +161,14 @@ POINTER.on('down', (e) => {
          */
 
         if (!POINTER.clickedElement) {
-
             IMAGES.deselect();
         }
 
     } else if (POINTER.isDown(POINTER.BTN_MIDDLE)) {
 
         /**
-             * Deselect image in MANIPULATOR.
-             */
+         * Deselect image in MANIPULATOR.
+         */
 
         IMAGES.deselect();
 
@@ -187,12 +186,6 @@ POINTER.on('down', (e) => {
     }
 });
 
-POINTER.on('click', (e) => {
-    if (POINTER.clickedElement?.type == 'image') {
-        IMAGES.manipulator = MANIPULATOR_TYPE.TRANSFORM;
-    }
-});
-
 // DEBUG //
 
 IMAGES.new( 
@@ -202,16 +195,4 @@ IMAGES.new(
         x: canvas.width/2, 
         y: canvas.height/2,
         draggable: true,
-        onMouseDown() {
-            console.log('DOWN', this);
-        },
-        onMouseUp() {
-            console.log('UP', this);
-        },
-        onMouseClick() {
-            console.log('CLICK', this);
-        },
-        onMouseMove() {
-            console.log('MOVING', this);
-        },
     } );
