@@ -1,8 +1,8 @@
 # iman-js
 
-**A simple Image MANipulator written in Javascript using Canvas without frameworks.**
+A simple Image MANipulator written in Javascript using Canvas without dependencies.
 
-## **This project it's in early development, use it at your own risk.**
+**This project it's in early development, use it at your own risk.**
 
 ![Little demo](./demo.gif)
 
@@ -10,21 +10,28 @@
 
 ## To-do:
 
-- [x] Move images/entities. (kinda ????)
+### Engine:
+- [ ] Canvas framework.
+    - [ ] Draw geometric figures.
+        - [ ] Rectangle.
+            - [ ] Rounded corners.
+        - [ ] Circle.
+        - [ ] Polygon.
+    - [ ] Draw text.
+    - [ ] Images.
 
--  [ ] Transform images:
-
-    [ ] System of collision to manipulate the .
-    
-    [ ] Rotation.
-
-    [ ] Scale.
-
+### Image manipulation:
+- [x] Move images/entities.
+- [x] Scale.
+    - [ ] Adapt the image pivot when rezising.
+- [ ] Rotation.
 - [ ] Crop images.
 
-- Interface.
-
+### Interface:
+- [ ] Upload images.
+- [ ] Buttons system.
+- [ ] Menus system.
 
 ## Note:
 
-*It's one of my first projects, so it's probably going to be a mess, but somehow I have to learn how to program. Feel free to criticize :)*
+*It's one of my first projects, so it's probably going to be a mess. Feel free to criticize :)*
