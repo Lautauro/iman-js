@@ -39,11 +39,11 @@ export class Entity {
 
         this.properties = {
             origin:     new V2(obj.originX ?? 0, obj.originY ?? 0),
-            
             visible:     obj.visible       ?? true,
             width:       obj.width         ?? 0,
             height:      obj.height        ?? 0,
             angle:       obj.angle         ?? 0,       // TO-DO
+            alpha:       obj.alpha         ?? 1,
             fillColor:   obj.fillColor     ?? '#6b6b6b',
             strokeColor: obj.strokeColor   ?? '#6b6b6b',
         };

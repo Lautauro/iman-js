@@ -124,13 +124,7 @@ export class Images {
     draw(ctx) {
         for (let image of this.list) {
             if (image.properties.visible) {
-                ctx.drawImage(
-                    image.img, 
-                    image.pos.x - image.properties.origin.x, 
-                    image.pos.y - image.properties.origin.y, 
-                    image.properties.width, 
-                    image.properties.height
-                    );
+                ctx.drawImage(image);
             }
         }
 
@@ -211,7 +205,11 @@ class ImageTransform {
 
         this.boxes = {
 
-            pivot:      new Entity({ name: 'pivot', parent:   this, type:'manipulation', width: 30, height: 30, originX: 15, originY: 15, draggable: true, fillColor: 'red'}),
+            /**
+             * Pivot
+             */
+
+            pivot:      new Entity({ name: 'pivot', parent: this, type:'manipulation', width: 30, height: 30, originX: 15, originY: 15, draggable: false, fillColor: 'red'}),
 
             /**
              * Top.
@@ -608,7 +606,7 @@ class ImageTransform {
             this.height = this.img.properties.height;
 
             /**
-             * Pivot  // TEST
+             * Pivot
              */
 
             this.boxes.pivot.pos   = new V2(this.img.pos.x, this.img.pos.y);
@@ -692,18 +690,14 @@ class ImageTransform {
     }
 
     draw(ctx) {
-        if (this.img && this.visible) {
+        if (this.img) {
 
             /**
              * Borders
              */
-            
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(this.img.pos.x - this.img.properties.origin.x, this.img.pos.y - this.img.properties.origin.y, this.img.properties.width, this.img.properties.height);
-            ctx.strokeStyle = '#6b6b6b';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(this.img.pos.x - this.img.properties.origin.x, this.img.pos.y - this.img.properties.origin.y, this.img.properties.width, this.img.properties.height);
+
+            ctx.drawRectangle(Object.assign({strokeColor: '#ffffff', lineWidth: 4}, this.img), true, false);
+            ctx.drawRectangle(Object.assign({strokeColor: '#6b6b6b', lineWidth: 2}, this.img), true, false);
 
             /**
              * Boxes
@@ -711,11 +705,7 @@ class ImageTransform {
 
             for (let box in this.boxes) {
                 if (this.boxes[box].properties.visible) {   
-                    ctx.strokeStyle = this.boxes[box].properties.strokeColor;
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(this.boxes[box].pos.x - this.boxes[box].properties.origin.x , this.boxes[box].pos.y - this.boxes[box].properties.origin.y , this.boxes[box].properties.width, this.boxes[box].properties.height);
-                    ctx.fillStyle = this.boxes[box].properties.fillColor;
-                    ctx.fillRect(this.boxes[box].pos.x - this.boxes[box].properties.origin.x , this.boxes[box].pos.y - this.boxes[box].properties.origin.y , this.boxes[box].properties.width, this.boxes[box].properties.height);
+                    ctx.drawRectangle(Object.assign({ strokeColor: '#ffffff', lineWidth: 2 }, this.boxes[box]), 'inside', true);
                 }
             }
         }

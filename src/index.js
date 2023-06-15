@@ -2,6 +2,7 @@
 import { ENTITIES } from "./js/entity.js";
 import { Images, MANIPULATOR_TYPE } from "./js/images.js";
 import { Pointer } from "./js/pointer.js";
+import { Context2D } from "./js/context2D.js";
 
 /**
  * Setup canvas.
@@ -29,6 +30,8 @@ let windowResized = false;
  * Step function.
  */
 
+const context = new Context2D( ctx );
+
 function step() {
     if (windowResized) {
         canvas.width  = window.innerWidth;
@@ -53,7 +56,7 @@ function step() {
      * Draw Images
      */
 
-    IMAGES.draw(ctx);
+    IMAGES.draw(context);
 
     /**
      * Draw Interface
